@@ -19,11 +19,8 @@ have a different scale than distance between markers.}
   spec.homepage      = "https://github.com/gene-ressler/lulu/wiki"
   spec.licenses      = "GPL-3.0"
 
-  spec.files       = Dir.glob('lib/**/*.rb') + Dir.glob('ext/**/*.{c,h,rb}')
-  spec.extensions  = ['ext/WPBDC/extconf.rb']
-  spec.executables = ['WPBDC']
-
   spec.files         = `git ls-files`.split($/)
+  spec.extensions  = ['ext/lulu/extconf.rb']
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]

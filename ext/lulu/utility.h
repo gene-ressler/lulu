@@ -42,8 +42,8 @@ void trace(const char *fmt, ...);
 #define TRACE(Args)
 #endif
 
-void *safe_malloc(size_t size, char *file, int line);
-void *safe_realloc(void *p, size_t size, char *file, int line);
+void *safe_malloc(size_t size, const char *file, int line);
+void *safe_realloc(void *p, size_t size, const char *file, int line);
 int high_bit_position(unsigned n);
 double rand_double(void);
 

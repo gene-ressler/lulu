@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "utility.h"
 
-void *safe_malloc(size_t size, char *file, int line) {
+void *safe_malloc(size_t size, const char *file, int line) {
 	void *p = malloc(size);
 	if (!p) {
 		fprintf(stderr, "%s:%d: out of memory\n", file, line);
@@ -18,7 +18,7 @@ void *safe_malloc(size_t size, char *file, int line) {
 	return p;
 }
 
-void *safe_realloc(void *p, size_t size, char *file, int line) {
+void *safe_realloc(void *p, size_t size, const char *file, int line) {
 	p = realloc(p, size);
 	if (!p) {
 		fprintf(stderr, "%s:%d: out of memory\n", file, line);

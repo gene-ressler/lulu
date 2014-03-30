@@ -180,7 +180,7 @@ static void get_mindist(MARKER_INFO *info, MARKER *markers, int x, int n, int *a
  *
  * It is slightly adapted from the "generic" algorithm in
  *
- * Daniel MŸllner,
+ * Daniel Muellner,
  * "Modern hierarchical, agglomerative clustering algorithms"
  * http://arxiv.org/abs/1109.2378
  */

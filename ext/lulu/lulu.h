@@ -25,6 +25,6 @@ void init_marker_list(MARKER_LIST *list);
 MARKER_LIST *new_marker_list(void);
 void free_marker_list(MARKER_LIST *list);
 void clear_marker_list(MARKER_LIST *list);
-void add_marker(MARKER *marker, MARKER_LIST *list);
+void add_marker(MARKER_LIST *list, COORD x, COORD y, SIZE size);
 
 #endif /* LULU_H_ */
