@@ -13,13 +13,12 @@
 #include "utility.h"
 #include "test.h"
 
-// Change a bounding box to the given quadrant of itself.
-#define TO_QUADRANT(Q, X, Y, W, H) do { \
-  W *= 0.5; \
-  H *= 0.5; \
-  if (Q & 1) X += W; \
-  if (Q & 2) Y += H; \
-} while (0)
+// Declare the given quadrant of a given bounding box.
+#define QUADRANT_DECL(Q, QX, QY, QW, QH, X, Y, W, H) \
+  double QW = W * 0.5; \
+  double QH = H * 0.5; \
+  double QX = (Q & 1) ? X + QW : X; \
+  double QY = (Q & 2) ? Y + QH : Y
 
 // Initialize a node to an empty leaf.
 static void init_leaf(NODE *node) {
@@ -120,9 +119,8 @@ static void insert(NODE *node, int levels, double x, double y, double w, double 
 		int code = touch_code(x, y, w, h, marker);
 		for (int q = 0; q < 4; q++)
 			if (code & bit(q)) {
-				double xx = x, yy = y, ww = w, hh = h;
-				TO_QUADRANT(q, xx, yy, ww, hh);
-				insert(node->children + q, levels - 1, xx, yy, ww, hh, marker);
+				QUADRANT_DECL(q, qx, qy, qw, qh, x, y, w, h);
+				insert(node->children + q, levels - 1, qx, qy, qw, qh, marker);
 			}
 	}
 }
@@ -144,9 +142,8 @@ static void delete(NODE *node, int levels, double x, double y, double w, double 
 		int code = touch_code(x, y, w, h, marker);
 		for (int q = 0; q < 4; q++)
 			if (code & bit(q)) {
-				double xx = x, yy = y, ww = w, hh = h;
-				TO_QUADRANT(q, xx, yy, ww, hh);
-				delete(node->children + q, levels - 1, xx, yy, ww, hh, marker);
+				QUADRANT_DECL(q, qx, qy, qw, qh, x, y, w, h);
+				delete(node->children + q, levels - 1, qx, qy, qw, qh, marker);
 			}
 		if (empty_leaves_p(node->children))
 			Free(node->children);
@@ -184,9 +181,8 @@ static void search_for_nearest(MARKER_INFO *info, NODE *node, double x, double y
 		int code = touch_code(x, y, w, h, marker);
 		for (int q = 0; q < 4; q++)
 			if (code & bit(q)) {
-				double xx = x, yy = y, ww = w, hh = h;
-				TO_QUADRANT(q, xx, yy, ww, hh);
-				search_for_nearest(info, node->children + q, xx, yy, ww, hh, marker, nearest);
+				QUADRANT_DECL(q, qx, qy, qw, qh, x, y, w, h);
+				search_for_nearest(info, node->children + q, qx, qy, qw, qh, marker, nearest);
 			}
 	}
 }
@@ -244,9 +240,8 @@ static void draw(FILE *f, NODE *node, double x, double y, double w, double h) {
 	emit_marker_ptr_array(f, node->markers, node->marker_count);
 	if (internal_p(node)) {
 		for (int q = 0; q < 4; q++) {
-			double xx = x, yy = y, ww = w, hh = h;
-			TO_QUADRANT(q, xx, yy, ww, hh);
-			draw(f, node->children + q, xx, yy, ww, hh);
+			QUADRANT_DECL(q, qx, qy, qw, qh, x, y, w, h);
+			draw(f, node->children + q, qx, qy, qw, qh);
 		}
 	}
 }

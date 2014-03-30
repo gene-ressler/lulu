@@ -15,27 +15,6 @@
 #include "utility.h"
 #include "pq.h"
 
-#if 0
-void check_locs(char *tag, PRIORITY_QUEUE *q) {
-	for (int j = 0; j < q->size; j++) {
-		int k = q->heap[j];
-		if (q->locs[k] != j) {
-			trace("%s: heap[%d]=%d, locs[%d]=%d\n", tag, j, k, k, q->locs[k]);
-			assert(0);
-		}
-	}
-	int n = 0;
-	for (int i = 0; i < q->max_size; i++) {
-		if (q->locs[i] != -1)
-		n++;
-	}
-	if (n != q->size) {
-		trace("%s: locs count: n = %d, size=%d\n", tag, n, q->size);
-		assert(0);
-	}
-}
-#endif
-
 // Move index at heap location j upward until its parent's value is no bigger.
 static void pq_sift_up(PRIORITY_QUEUE *q, int j) {
 	int i = q->heap[j];

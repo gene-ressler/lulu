@@ -14,10 +14,14 @@
 #define SQRT_1_PI 0.564189583547756286948079451560772585844050629328998856844085
 
 void mr_info_init(MARKER_INFO *info) {
+    info->kind = CIRCLE;
+    info->scale = 1;
 	info->c = SQRT_1_PI;
 }
 
 void mr_info_set(MARKER_INFO *info, MARKER_KIND kind, DISTANCE scale) {
+    info->kind = kind;
+    info->scale = scale;
 	info->c = scale * (kind == SQUARE ? 0.5 : SQRT_1_PI);
 }
 
@@ -60,7 +64,8 @@ DISTANCE mr_distance(MARKER_INFO *info, MARKER *a, MARKER *b) {
 		double r_sum = mr_r(a) + mr_r(b);
 		double dx = fabs(mr_x(b) - mr_x(a)) - r_sum;
 		double dy = fabs(mr_y(b) - mr_y(a)) - r_sum;
-		return dx < 0 && dy < 0 ? fmax(dx, dy) : sqrt(dx * dx + dy * dy);
+		DISTANCE d = dx < 0 && dy < 0 ? fmax(dx, dy) : sqrt(dx * dx + dy * dy);
+		return d;
 	}
 	double dx = mr_x(b) - mr_x(a);
 	double dy = mr_y(b) - mr_y(a);
@@ -92,4 +97,43 @@ void get_marker_array_extent(MARKER *a, int n_markers, MARKER_EXTENT *ext) {
 		ext->w = ee - ew;
 		ext->h = en - es;
 	}
+}
+
+void init_marker_list(MARKER_LIST *list) {
+    mr_info_init(list->info);
+    list->markers = NULL;
+    list->size = list->max_size = 0;
+}
+
+MARKER_LIST *new_marker_list(void) {
+    NewDecl(MARKER_LIST, list);
+    init_marker_list(list);
+    return list;
+}
+
+void clear_marker_list(MARKER_LIST *list) {
+    Free(list->markers);
+    init_marker_list(list);
+}
+
+void free_marker_list(MARKER_LIST *list) {
+    clear_marker_list(list);
+    Free(list);
+}
+
+void add_marker(MARKER_LIST *list, COORD x, COORD y, SIZE size) {
+    if (list->size >= list->max_size) {
+        list->max_size = 4 + 2 * list->max_size;
+        RenewArray(list->markers, list->max_size);
+    }
+    MARKER *marker = list->markers + list->size++;
+    mr_set(list->info, marker, x, y, size);
+}
+
+void ensure_headroom(MARKER_LIST *list) {
+    int needed_size = 2 * list->size - 1;
+    if (list->max_size < needed_size) {
+        list->max_size = needed_size;
+        RenewArray(list->markers, list->max_size);
+    }
 }

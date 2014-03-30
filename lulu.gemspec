@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
 %q{Lulu merges the closest overlapping pair of map markers into a one whose
 area is the sum of the original two, located at their centroid. It repeats
 this until no overlaps remain. Some interesting data structures make this
-quite fast for all but pathologically bad data. Markers can be cirles or
+quite fast for all but pathologically bad data. Markers can be circles or
 squares. The user may provide a scale factor allowing the marker radius to
 have a different scale than distance between markers.}
   spec.homepage      = "https://github.com/gene-ressler/lulu/wiki"
