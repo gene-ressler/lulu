@@ -64,20 +64,4 @@ DISTANCE mr_distance(MARKER_INFO *info, MARKER *a, MARKER *b);
 DISTANCE size_to_radius(MARKER_INFO *info, SIZE size);
 void get_marker_array_extent(MARKER *a, int n_markers, MARKER_EXTENT *ext);
 
-typedef struct marker_list_s {
-    MARKER_INFO info[1];
-    MARKER *markers;
-    int size, max_size;
-} MARKER_LIST;
-
-#define MARKER_LIST_DECL(Name)  MARKER_LIST Name[1]; init_marker_list(Name)
-#define ml_set_marker_list_info(L, Kind, Scale)  mr_info_set((L)->info, (Kind), (Scale))
-
-void init_marker_list(MARKER_LIST *list);
-MARKER_LIST *new_marker_list(void);
-void clear_marker_list(MARKER_LIST *list);
-void free_marker_list(MARKER_LIST *list);
-void add_marker(MARKER_LIST *list, COORD x, COORD y, SIZE size);
-void ensure_headroom(MARKER_LIST *list);
-
 #endif /* MARKER_H_ */

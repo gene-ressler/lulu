@@ -12,14 +12,65 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ruby.h"
-#include "lulu.h"
 #include "utility.h"
 #include "marker.h"
 #include "merger.h"
 #include "pq.h"
 #include "qt.h"
 
-char EXT_VERSION[] = "0.1.1";
+static char EXT_VERSION[] = "0.1.2";
+
+// -------- C marker list to be wrapped in a Ruby object -----------------------
+
+typedef struct marker_list_s {
+    MARKER_INFO info[1];
+    MARKER *markers;
+    int size, max_size;
+} MARKER_LIST;
+
+#define MARKER_LIST_DECL(Name)  MARKER_LIST Name[1]; init_marker_list(Name)
+#define ml_set_marker_list_info(L, Kind, Scale)  mr_info_set((L)->info, (Kind), (Scale))
+
+void init_marker_list(MARKER_LIST *list) {
+    mr_info_init(list->info);
+    list->markers = NULL;
+    list->size = list->max_size = 0;
+}
+
+MARKER_LIST *new_marker_list(void) {
+    NewDecl(MARKER_LIST, list);
+    init_marker_list(list);
+    return list;
+}
+
+void clear_marker_list(MARKER_LIST *list) {
+    Free(list->markers);
+    init_marker_list(list);
+}
+
+void free_marker_list(MARKER_LIST *list) {
+    clear_marker_list(list);
+    Free(list);
+}
+
+void add_marker(MARKER_LIST *list, COORD x, COORD y, SIZE size) {
+    if (list->size >= list->max_size) {
+        list->max_size = 4 + 2 * list->max_size;
+        RenewArray(list->markers, list->max_size);
+    }
+    MARKER *marker = list->markers + list->size++;
+    mr_set(list->info, marker, x, y, size);
+}
+
+void ensure_headroom(MARKER_LIST *list) {
+    int needed_size = 2 * list->size - 1;
+    if (list->max_size < needed_size) {
+        list->max_size = needed_size;
+        RenewArray(list->markers, list->max_size);
+    }
+}
+
+// -------- Ruby API implementation --------------------------------------------
 
 static void rb_api_free_marker_list(void *list) {
 	free_marker_list(list);
@@ -139,16 +190,6 @@ static struct ft_entry {
     FUNCTION_TABLE_ENTRY(merge),
 };
 
-#ifdef USE_INT_CONST
-#define INT_CONST_TABLE_ENTRY(Name) { #Name, Name }
-
-static struct ict_entry {
-  char *name;
-  int val;
-} int_const_table[] = {
-};
-#endif
-
 #define STRING_CONST_TABLE_ENTRY(Name) { #Name, Name }
 
 static struct sct_entry {
@@ -168,13 +209,6 @@ void Init_lulu(void)
         struct ft_entry *e = function_table + i;
         rb_define_method(klass, e->name, e->func, e->argc);
     }
-
-#ifdef USE_INT_CONST
-    for (int i = 0; i < STATIC_ARRAY_SIZE(int_const_table); i++) {
-        struct ict_entry *e = int_const_table + i;
-        rb_define_const(module, e->name, INT2FIX(e->val));
-    }
-#endif
 
     for (int i = 0; i < STATIC_ARRAY_SIZE(string_const_table); i++) {
         struct sct_entry *e = string_const_table + i;

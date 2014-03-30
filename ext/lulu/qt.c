@@ -230,7 +230,7 @@ MARKER *qt_nearest(QUADTREE *qt, MARKER *marker) {
 
 int qt_nearest_wrt(MARKER *markers, QUADTREE *qt, int a) {
 	MARKER *nearest = qt_nearest(qt, markers + a);
-	return nearest ? nearest - markers : -1;
+	return nearest ? (int)(nearest - markers) : -1;
 }
 
 #ifndef EXCLUDE_UNIT_TEST
