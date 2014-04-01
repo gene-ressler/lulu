@@ -254,7 +254,7 @@ static void draw_nearest(FILE *f, MARKER *markers, MARKER **nearest_markers, int
 	}
 }
 
-int qt_draw(QUADTREE *qt, MARKER *markers, MARKER **nearest_markers, int n_markers, char *name) {
+int qt_draw(QUADTREE *qt, MARKER *markers, MARKER **nearest_markers, int n_markers, const char *name) {
 	char buf[1024];
 	sprintf(buf, "test/%s.js", name);
 	FILE *f = fopen(buf, "w");

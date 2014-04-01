@@ -10,7 +10,7 @@
 
 #include "marker.h"
 
-int emit_markers(char *name, MARKER *markers, int n_markers);
+int emit_markers(const char *name, MARKER *markers, int n_markers);
 void emit_rectangle(FILE *f, double x, double y, double w, double h);
 void emit_segment(FILE *f, MARKER *a, MARKER *b);
 int emit_marker_array(FILE *f, MARKER *markers, int n_markers);

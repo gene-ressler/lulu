@@ -73,11 +73,12 @@ void ensure_headroom(MARKER_LIST *list) {
 void compress(MARKER_LIST *list) {
     int dst = 0;
     for (int src = 0; src < list->size; src++)
-        if (!mr_deleted_p(list->markers + src))
-            if (src == dst)
-                dst++;
-            else
-                list->markers[dst++] = list->markers[src];
+        if (!mr_deleted_p(list->markers + src)) {
+            if (src != dst)
+                list->markers[dst] = list->markers[src];
+            mr_reset_parts(list->markers + dst);
+            dst++;
+        }
     list->size = dst;
 }
 
@@ -224,11 +225,11 @@ static VALUE rb_api_merge(VALUE self_value)
     return INT2FIX(self->size);
 }
 
-#define FUNCTION_TABLE_ENTRY(Name) { #Name, rb_api_ ## Name, ARGC_ ## Name }
+#define FUNCTION_TABLE_ENTRY(Name) { #Name, RUBY_METHOD_FUNC(rb_api_ ## Name), ARGC_ ## Name }
 
 static struct ft_entry {
-    char *name;
-    VALUE (*func)();
+    const char *name;
+    VALUE (*func)(ANYARGS);
     int argc;
 } function_table[] = {
     FUNCTION_TABLE_ENTRY(add),
@@ -246,8 +247,8 @@ static struct ft_entry {
 #define STRING_CONST_TABLE_ENTRY(Name) { #Name, Name }
 
 static struct sct_entry {
-  char *name;
-  char *val;
+  const char *name;
+  const char *val;
 } string_const_table[] = {
     STRING_CONST_TABLE_ENTRY(EXT_VERSION)
 };

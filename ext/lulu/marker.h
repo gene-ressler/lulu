@@ -58,6 +58,7 @@ typedef struct marker_extent_s {
 #define mr_n(M) ((M)->y + (M)->r)
 
 void mr_init(MARKER *marker, int n_markers);
+void mr_reset_parts(MARKER *marker);
 void mr_info_init(MARKER_INFO *info);
 void mr_info_set(MARKER_INFO *info, MARKER_KIND kind, DISTANCE scale);
 void mr_set(MARKER_INFO *info, MARKER *marker, COORD x, COORD y, SIZE size);

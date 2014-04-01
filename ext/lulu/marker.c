@@ -32,9 +32,13 @@ void mr_init(MARKER *markers, int n_markers) {
 		marker->size = 0;
 		marker->r = 0;
 		marker->x = marker->y = marker->x_sum = marker->y_sum = 0;
-		marker->part_a = -1;
-		marker->part_b = 0;
+		mr_reset_parts(marker);
 	}
+}
+
+void mr_reset_parts(MARKER *marker) {
+    marker->part_a = -1;
+    marker->part_b = 0;
 }
 
 void mr_set(MARKER_INFO *info, MARKER *marker, COORD x, COORD y, SIZE size) {

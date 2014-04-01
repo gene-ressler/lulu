@@ -45,7 +45,7 @@ int emit_marker_array(FILE *f, MARKER *markers, int n_markers) {
 	return n_emitted;
 }
 
-int emit_markers(char *name, MARKER *markers, int n_markers) {
+int emit_markers(const char *name, MARKER *markers, int n_markers) {
 	char buf[1024];
 	sprintf(buf, "test/%s.js", name);
 	FILE *f = fopen(buf, "w");
@@ -59,9 +59,9 @@ int emit_markers(char *name, MARKER *markers, int n_markers) {
 }
 
 void set_random_markers(MARKER_INFO *info, MARKER *markers, int n_markers) {
-	unsigned t = time(0);
+	unsigned t = (unsigned)time(0);
 	fprintf(stderr, "seed=%u\n", t);
-	srandom(t);
+	srand(t);
 	int size = 8;
 	double x_size = 1024;
 	double y_size = 760;

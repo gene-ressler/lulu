@@ -41,9 +41,9 @@ int high_bit_position(unsigned n) {
 
 double rand_double(void)
 {
-	unsigned i = random();
-	i = (i << 8) ^ random();
-	i = (i << 8) ^ random();
-	i = (i << 8) ^ random();
+	unsigned i = rand();
+	i = (i << 8) ^ (unsigned)rand();
+	i = (i << 8) ^ (unsigned)rand();
+	i = (i << 8) ^ (unsigned)rand();
 	return i / (256.0 * 256.0 * 256.0 * 256.0);
 }
