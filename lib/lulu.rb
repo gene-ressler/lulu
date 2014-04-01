@@ -6,10 +6,7 @@ module Lulu
 
     def markers
       list = []
-      length.times do |i|
-        m = marker(i)
-        list << m if m
-      end
+      length.times {|i| list << marker(i) unless deleted(i) }
       list
     end
 

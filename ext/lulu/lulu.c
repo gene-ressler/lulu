@@ -70,6 +70,17 @@ void ensure_headroom(MARKER_LIST *list) {
     }
 }
 
+void compress(MARKER_LIST *list) {
+    int dst = 0;
+    for (int src = 0; src < list->size; src++)
+        if (!mr_deleted_p(list->markers + src))
+            if (src == dst)
+                dst++;
+            else
+                list->markers[dst++] = list->markers[src];
+    list->size = dst;
+}
+
 // -------- Ruby API implementation --------------------------------------------
 
 static void rb_api_free_marker_list(void *list) {
@@ -137,14 +148,14 @@ static VALUE rb_api_add(VALUE self_value, VALUE x_value, VALUE y_value, VALUE si
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
     add_marker(self, rb_num2dbl(x_value), rb_num2dbl(y_value), rb_num2dbl(size_value));
-    return self_value;
+    return INT2FIX(self->size);
 }
 
 static VALUE rb_api_length(VALUE self_value)
 #define ARGC_length 0
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
-    return rb_int2inum(self->size);
+    return INT2FIX(self->size);
 }
 
 static VALUE rb_api_marker(VALUE self_value, VALUE index)
@@ -154,8 +165,6 @@ static VALUE rb_api_marker(VALUE self_value, VALUE index)
     int i = NUM2INT(index);
     if (0 <= i && i < self->size) {
         MARKER *marker = self->markers + i;
-        if (mr_deleted_p(marker))
-            return Qfalse;
         VALUE triple = rb_ary_new2(3);
         rb_ary_store(triple, 0, rb_float_new(mr_x(marker)));
         rb_ary_store(triple, 1, rb_float_new(mr_y(marker)));
@@ -165,29 +174,73 @@ static VALUE rb_api_marker(VALUE self_value, VALUE index)
     return Qnil;
 }
 
+static VALUE rb_api_parts(VALUE self_value, VALUE index)
+#define ARGC_parts 1
+{
+    MARKER_LIST_FOR_VALUE_DECL(self);
+    int i = NUM2INT(index);
+    if (0 <= i && i < self->size) {
+        MARKER *marker = self->markers + i;
+        VALUE rtn;
+        if (mr_merged(marker)) {
+            rtn = rb_ary_new2(3);
+            rb_ary_store(rtn, 0, ID2SYM(rb_intern(mr_deleted_p(marker) ? "merge" : "root")));
+            rb_ary_store(rtn, 1, INT2FIX(marker->part_a));
+            rb_ary_store(rtn, 2, INT2FIX(marker->part_b));
+        } else {
+            rtn = rb_ary_new2(1);
+            rb_ary_store(rtn, 0, ID2SYM(rb_intern(mr_deleted_p(marker) ? "leaf" : "single")));
+        }
+        return rtn;
+    }
+    return Qnil;
+}
+
+static VALUE rb_api_deleted(VALUE self_value, VALUE index)
+#define ARGC_deleted 1
+{
+    MARKER_LIST_FOR_VALUE_DECL(self);
+    int i = NUM2INT(index);
+    if (0 <= i && i < self->size)
+        return mr_deleted_p(self->markers + i) ? Qtrue : Qfalse;
+    return Qnil;
+}
+
+static VALUE rb_api_compress(VALUE self_value)
+#define ARGC_compress 0
+{
+    MARKER_LIST_FOR_VALUE_DECL(self);
+    compress(self);
+    return INT2FIX(self->size);
+}
+
 static VALUE rb_api_merge(VALUE self_value)
 #define ARGC_merge 0
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
     ensure_headroom(self);
+    compress(self);
     self->size = merge_markers_fast(self->info, self->markers, self->size);
-    return self_value;
+    return INT2FIX(self->size);
 }
 
 #define FUNCTION_TABLE_ENTRY(Name) { #Name, rb_api_ ## Name, ARGC_ ## Name }
 
 static struct ft_entry {
-  char *name;
-  VALUE (*func)();
-  int argc;
+    char *name;
+    VALUE (*func)();
+    int argc;
 } function_table[] = {
-    FUNCTION_TABLE_ENTRY(initialize_copy),
-    FUNCTION_TABLE_ENTRY(clear),
-    FUNCTION_TABLE_ENTRY(set_info),
     FUNCTION_TABLE_ENTRY(add),
+    FUNCTION_TABLE_ENTRY(compress),
+    FUNCTION_TABLE_ENTRY(clear),
+    FUNCTION_TABLE_ENTRY(deleted),
+    FUNCTION_TABLE_ENTRY(initialize_copy),
     FUNCTION_TABLE_ENTRY(length),
     FUNCTION_TABLE_ENTRY(marker),
     FUNCTION_TABLE_ENTRY(merge),
+    FUNCTION_TABLE_ENTRY(parts),
+    FUNCTION_TABLE_ENTRY(set_info),
 };
 
 #define STRING_CONST_TABLE_ENTRY(Name) { #Name, Name }

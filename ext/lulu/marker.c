@@ -32,6 +32,8 @@ void mr_init(MARKER *markers, int n_markers) {
 		marker->size = 0;
 		marker->r = 0;
 		marker->x = marker->y = marker->x_sum = marker->y_sum = 0;
+		marker->part_a = -1;
+		marker->part_b = 0;
 	}
 }
 
@@ -45,7 +47,10 @@ void mr_set(MARKER_INFO *info, MARKER *marker, COORD x, COORD y, SIZE size) {
 	marker->y_sum = y * size;
 }
 
-void mr_merge(MARKER_INFO *info, MARKER *merged, MARKER *a, MARKER *b) {
+void mr_merge(MARKER_INFO *info, MARKER *markers, int i_merged, int ia, int ib) {
+    MARKER *merged = markers + i_merged;
+    MARKER *a = markers + ia;
+    MARKER *b = markers + ib;
 	merged->deleted_p = 0;
 	merged->size = a->size + b->size;
 	merged->r = size_to_radius(info, merged->size);
@@ -53,6 +58,8 @@ void mr_merge(MARKER_INFO *info, MARKER *merged, MARKER *a, MARKER *b) {
 	merged->y_sum = a->y_sum + b->y_sum;
 	merged->x = merged->x_sum / merged->size;
 	merged->y = merged->y_sum / merged->size;
+	merged->part_a = ia;
+	merged->part_b = ib;
 }
 
 DISTANCE size_to_radius(MARKER_INFO *info, SIZE size) {

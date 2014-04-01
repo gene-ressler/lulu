@@ -20,7 +20,8 @@ typedef struct marker_s {
 	SIZE size;
 	DISTANCE r;
 	COORD x, y, x_sum, y_sum;
-	int deleted_p;
+	int part_a;
+	unsigned deleted_p:1, part_b:31;
 } MARKER;
 
 typedef enum marker_kind_e {
@@ -47,6 +48,7 @@ typedef struct marker_extent_s {
 
 #define mr_deleted_p(M)		((M)->deleted_p)
 #define mr_set_deleted(M)	do { (M)->deleted_p = 1; } while (0)
+#define mr_merged(M)        ((M)->part_a >= 0)
 #define mr_x(M) ((M)->x)
 #define mr_y(M) ((M)->y)
 #define mr_r(M) ((M)->r)
@@ -59,7 +61,7 @@ void mr_init(MARKER *marker, int n_markers);
 void mr_info_init(MARKER_INFO *info);
 void mr_info_set(MARKER_INFO *info, MARKER_KIND kind, DISTANCE scale);
 void mr_set(MARKER_INFO *info, MARKER *marker, COORD x, COORD y, SIZE size);
-void mr_merge(MARKER_INFO *info, MARKER *merged, MARKER *a, MARKER *b);
+void mr_merge(MARKER_INFO *info, MARKER *markers, int merged, int a, int b);
 DISTANCE mr_distance(MARKER_INFO *info, MARKER *a, MARKER *b);
 DISTANCE size_to_radius(MARKER_INFO *info, SIZE size);
 void get_marker_array_extent(MARKER *a, int n_markers, MARKER_EXTENT *ext);

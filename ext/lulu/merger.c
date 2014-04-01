@@ -57,7 +57,6 @@ int merge_markers_fast(MARKER_INFO *info, MARKER *markers, int n_markers) {
 
 	// Set up the quadtree with the bounding box. Choose tree depth heuristically.
 	int max_depth = high_bit_position(n_markers) / 4 + 3;
-	// fprintf(stderr, "max_depth = %d\n", max_depth);
 	qt_setup(qt, max_depth, ext->x, ext->y, ext->w, ext->h, info);
 
 	// Insert all the markers in the quadtree.
@@ -113,7 +112,7 @@ int merge_markers_fast(MARKER_INFO *info, MARKER *markers, int n_markers) {
 		// Create a new merged marker. Adding it after all others means
 		// nothing already in the heap could have it as nearest.
 		int aa = n_markers++;
-		mr_merge(info, markers + aa, markers + a, markers + b);
+		mr_merge(info, markers, aa, a, b);
 
 		// Add to quadtree.
 		qt_insert(qt, markers + aa);
@@ -153,123 +152,6 @@ int merge_markers_fast(MARKER_INFO *info, MARKER *markers, int n_markers) {
 	return n_markers;
 }
 
-/**
- * Return the arg min and min distance marker from the one at position x,
- * looking upward, i.e. in [x+1..n).
- */
-static void get_mindist(MARKER_INFO *info, MARKER *markers, int x, int n, int *argmin_rtn,
-		DISTANCE *min_rtn) {
-	int argmin = x + 1;
-	DISTANCE min = mr_distance(info, markers + x, markers + argmin);
-	for (int y = x + 2; y < n; y++) {
-		double d = mr_distance(info, markers + x, markers + y);
-		if (d < min) {
-			argmin = y;
-			min = d;
-		}
-	}
-	*argmin_rtn = argmin;
-	*min_rtn = min;
-}
-
-/**
- * Merge the markers in the array until they don't overlap any more.
- * Slots no longer needed are marked deleted.
- *
- * This algorithm is O(n^3) worst case and O(n^2) for typical data.
- *
- * It is slightly adapted from the "generic" algorithm in
- *
- * Daniel Muellner,
- * "Modern hierarchical, agglomerative clustering algorithms"
- * http://arxiv.org/abs/1109.2378
- */
-void merge_markers(MARKER_INFO *info, MARKER *markers, int n_markers) {
-	// 5-8
-	int *n_nghbr;
-	NewArray(n_nghbr, n_markers - 1);
-	DISTANCE *mindist;
-	NewArray(mindist, n_markers - 1);
-	for (int x = 0; x < n_markers - 1; x++)
-		get_mindist(info, markers, x, n_markers, n_nghbr + x, mindist + x);
-
-	// 2, 9
-	PRIORITY_QUEUE pq[1];
-	pq_init(pq);
-	pq_set_up(pq, mindist, n_markers - 1);
-
-	// 10
-	for (int i = 1; i < n_markers; i++) {
-
-		// 11
-		int a = pq_peek_min(pq);
-
-		// 12
-		int b = n_nghbr[a];
-
-		// 13
-		DISTANCE delta = mindist[a];
-
-		// 14
-		while (delta != mr_distance(info, markers + a, markers + b)) {
-
-			// 15-16
-			get_mindist(info, markers, a, n_markers, n_nghbr + a, mindist + a);
-			pq_update(pq, a);
-
-			// 17
-			a = pq_peek_min(pq);
-
-			// 18
-			b = n_nghbr[a];
-
-			// 19
-			delta = mindist[a];
-		} // 20
-
-		if (delta > 0)
-			break;
-
-		// 21, 24
-		a = pq_get_min(pq);
-
-		// 23, 25-27
-		mr_merge(info, markers + b, markers + b, markers + a);
-		mr_set_deleted(markers + a);
-
-		// 28, 33
-		for (int j = 0; j < pq_index_set_size(pq); j++) {
-			int x = pq_index(pq, j);
-
-			// 29-30
-			if (x < a && n_nghbr[x] == a)
-				n_nghbr[x] = b;
-
-			if (x < b) {
-
-				// 34
-				double d = mr_distance(info, markers + x, markers + b);
-				if (d < mindist[x]) {
-
-					// 35
-					n_nghbr[x] = b;
-
-					// 36
-					mindist[x] = d;
-					pq_update(pq, x);
-				}
-			}
-		}
-
-		// 39
-		get_mindist(info, markers, b, n_markers, n_nghbr + b, mindist + b);
-		pq_update(pq, b);
-	}
-	pq_clear(pq);
-	Free(n_nghbr);
-	Free(mindist);
-}
-
 #ifndef EXCLUDE_UNIT_TEST
 
 #include <sys/time.h>
@@ -294,7 +176,6 @@ int merge_test(int size) {
 	gettimeofday(start, NULL);
 
 	size = merge_markers_fast(info, markers, size);
-	// merge_markers(info, markers, size);
 
 	gettimeofday(stop, NULL);
 
