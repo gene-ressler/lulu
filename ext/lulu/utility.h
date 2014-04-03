@@ -10,45 +10,50 @@
 
 #define STATIC_ARRAY_SIZE(A) ((int)(sizeof A / sizeof A[0]))
 
-#ifdef NOT_RUBY_EXTENSION
+#ifdef LULU_STD_C
 
 // Our allocators.
 #define New(Ptr) do { \
-	(Ptr) = safe_malloc(sizeof *(Ptr), __FILE__, __LINE__); \
+    (Ptr) = safe_malloc(sizeof *(Ptr), __FILE__, __LINE__); \
 } while (0)
 
 #define NewArray(Ptr, Size) do { \
-	(Ptr) = safe_malloc((Size) * sizeof *(Ptr), __FILE__, __LINE__); \
+    (Ptr) = safe_malloc((Size) * sizeof *(Ptr), __FILE__, __LINE__); \
 } while (0)
 
 #define RenewArray(Ptr, Size) do { \
-	(Ptr) = safe_realloc((Ptr), (Size) * sizeof *(Ptr), __FILE__, __LINE__); \
+    (Ptr) = safe_realloc((Ptr), (Size) * sizeof *(Ptr), __FILE__, __LINE__); \
 } while (0)
 
 #define Free(Ptr) do { \
-	free(Ptr); \
-	Ptr = NULL; \
+    free(Ptr); \
+    Ptr = NULL; \
 } while (0)
 
-#else
+void *safe_malloc(size_t size, const char *file, int line);
+void *safe_realloc(void *p, size_t size, const char *file, int line);
+
+#endif
+
+#ifdef LULU_GEM
 
 #include "ruby.h"
 
 // Ruby allocators.  We can't use the macros without rewriting to include type parameters.
 #define New(Ptr) do { \
-	(Ptr) = (void*)xmalloc(sizeof *(Ptr)); \
+    (Ptr) = (void*)xmalloc(sizeof *(Ptr)); \
 } while (0)
 
 #define NewArray(Ptr, Size) do { \
-	(Ptr) = (void*)xmalloc2((Size), sizeof *(Ptr)); \
+    (Ptr) = (void*)xmalloc2((Size), sizeof *(Ptr)); \
 } while (0)
 
 #define RenewArray(Ptr, Size) do { \
-	(Ptr) = (void*)xrealloc2((char*)(Ptr), (Size), sizeof *(Ptr)); \
+    (Ptr) = (void*)xrealloc2((char*)(Ptr), (Size), sizeof *(Ptr)); \
 } while (0)
 
 #define Free(Ptr) do { \
-	Ptr = NULL; \
+    Ptr = NULL; \
 } while (0)
 
 #endif
@@ -66,9 +71,6 @@ void trace(const char *fmt, ...);
 #define TRACE(Args)
 #endif
 
-void *safe_malloc(size_t size, const char *file, int line);
-void *safe_realloc(void *p, size_t size, const char *file, int line);
 int high_bit_position(unsigned n);
-double rand_double(void);
 
 #endif /* UTILITY_H_ */

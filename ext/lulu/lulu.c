@@ -85,12 +85,12 @@ void compress(MARKER_LIST *list) {
 // -------- Ruby API implementation --------------------------------------------
 
 static void rb_api_free_marker_list(void *list) {
-	free_marker_list(list);
+    free_marker_list(list);
 }
 
 static VALUE rb_api_new_marker_list(VALUE klass) {
-	MARKER_LIST *list = new_marker_list();
-	return Data_Wrap_Struct(klass, 0, rb_api_free_marker_list, list);
+    MARKER_LIST *list = new_marker_list();
+    return Data_Wrap_Struct(klass, 0, rb_api_free_marker_list, list);
 }
 
 #define MARKER_LIST_FOR_VALUE_DECL(Var) MARKER_LIST *Var; Data_Get_Struct(Var ## _value, MARKER_LIST, Var)
@@ -247,8 +247,8 @@ static struct ft_entry {
 #define STRING_CONST_TABLE_ENTRY(Name) { #Name, Name }
 
 static struct sct_entry {
-  const char *name;
-  const char *val;
+    const char *name;
+    const char *val;
 } string_const_table[] = {
     STRING_CONST_TABLE_ENTRY(EXT_VERSION)
 };

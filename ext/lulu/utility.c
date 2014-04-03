@@ -9,41 +9,37 @@
 #include <stdlib.h>
 #include "utility.h"
 
+#ifdef LULU_STD_C
+
 void *safe_malloc(size_t size, const char *file, int line) {
-	void *p = malloc(size);
-	if (!p) {
-		fprintf(stderr, "%s:%d: out of memory\n", file, line);
-		exit(1);
-	}
-	return p;
+    void *p = malloc(size);
+    if (!p) {
+        fprintf(stderr, "%s:%d: out of memory\n", file, line);
+        exit(1);
+    }
+    return p;
 }
 
 void *safe_realloc(void *p, size_t size, const char *file, int line) {
-	p = realloc(p, size);
-	if (!p) {
-		fprintf(stderr, "%s:%d: out of memory\n", file, line);
-		exit(1);
-	}
-	return p;
+    p = realloc(p, size);
+    if (!p) {
+        fprintf(stderr, "%s:%d: out of memory\n", file, line);
+        exit(1);
+    }
+    return p;
 }
+
+#endif
 
 /**
  * Return the 0-based position of highest bit or -1 of zero.
  */
 int high_bit_position(unsigned n) {
-	int p = -1;
-	while (n) {
-		p++;
-		n >>= 1;
-	}
-	return p;
+    int p = -1;
+    while (n) {
+        p++;
+        n >>= 1;
+    }
+    return p;
 }
 
-double rand_double(void)
-{
-	unsigned i = rand();
-	i = (i << 8) ^ (unsigned)rand();
-	i = (i << 8) ^ (unsigned)rand();
-	i = (i << 8) ^ (unsigned)rand();
-	return i / (256.0 * 256.0 * 256.0 * 256.0);
-}

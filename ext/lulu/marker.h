@@ -17,37 +17,37 @@ typedef double DISTANCE;
 typedef double SIZE;
 
 typedef struct marker_s {
-	SIZE size;
-	DISTANCE r;
-	COORD x, y, x_sum, y_sum;
-	int part_a;
-	unsigned deleted_p:1, part_b:31;
+    SIZE size;
+    DISTANCE r;
+    COORD x, y, x_sum, y_sum;
+    int part_a;
+    unsigned deleted_p:1, part_b:31;
 } MARKER;
 
 typedef enum marker_kind_e {
-	CIRCLE,
-	SQUARE,
+    CIRCLE,
+    SQUARE,
 } MARKER_KIND;
 
 /**
  * Holds parameters of the distance function and merging.
  */
 typedef struct marker_type_info_s {
-	MARKER_KIND kind;
-	// User scale applied to radii of markers during distance computation.
-	DISTANCE scale;
-	// A scale factor that depends on both kind and user scale.
-	DISTANCE c;
+    MARKER_KIND kind;
+    // User scale applied to radii of markers during distance computation.
+    DISTANCE scale;
+    // A scale factor that depends on both kind and user scale.
+    DISTANCE c;
 } MARKER_INFO;
 
 #define MARKER_INFO_DECL(I) MARKER_INFO I[1]; mr_info_init(I)
 
 typedef struct marker_extent_s {
-	COORD x, y, w, h;
+    COORD x, y, w, h;
 } MARKER_EXTENT;
 
-#define mr_deleted_p(M)		((M)->deleted_p)
-#define mr_set_deleted(M)	do { (M)->deleted_p = 1; } while (0)
+#define mr_deleted_p(M)     ((M)->deleted_p)
+#define mr_set_deleted(M)   do { (M)->deleted_p = 1; } while (0)
 #define mr_merged(M)        ((M)->part_a >= 0)
 #define mr_x(M) ((M)->x)
 #define mr_y(M) ((M)->y)

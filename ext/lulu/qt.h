@@ -11,9 +11,9 @@
 #include "marker.h"
 
 typedef struct node_s {
-	struct node_s *children;
-	MARKER **markers;
-	int marker_count, markers_size;
+    struct node_s *children;
+    MARKER **markers;
+    int marker_count, markers_size;
 } NODE;
 
 #define leaf_p(Node) ((Node)->children == NULL)
@@ -37,10 +37,10 @@ typedef struct node_s {
 #define NE 3
 
 typedef struct quadtree_s {
-	double x, y, w, h;
-	int max_depth;
-	MARKER_INFO *info;
-	NODE root[1];
+    double x, y, w, h;
+    int max_depth;
+    MARKER_INFO *info;
+    NODE root[1];
 } QUADTREE;
 
 #define QUADTREE_DECL(Name) QUADTREE Name[1]; qt_init(Name)
@@ -51,7 +51,5 @@ void qt_insert(QUADTREE *qt, MARKER *marker);
 void qt_delete(QUADTREE *qt, MARKER *marker);
 MARKER *qt_nearest(QUADTREE *qt, MARKER *marker);
 int qt_nearest_wrt(MARKER *markers, QUADTREE *qt, int a);
-void qt_clear(QUADTREE *qt);
-int qt_test(int size);
 
 #endif /* QT_H_ */

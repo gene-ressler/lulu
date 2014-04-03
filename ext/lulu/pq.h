@@ -11,11 +11,11 @@
 typedef double PRIORITY_QUEUE_VALUE;
 
 typedef struct priority_queue_s {
-	int max_size;					// max number of items in heap
-	int size;						// current number of items in heap
-	int *heap;						// heap of indices to values
-	int *locs;						// map of value indices to heap locations
-	PRIORITY_QUEUE_VALUE *values;	// values referred to by heap
+    int max_size;                   // max number of items in heap
+    int size;                       // current number of items in heap
+    int *heap;                      // heap of indices to values
+    int *locs;                      // map of value indices to heap locations
+    PRIORITY_QUEUE_VALUE *values;   // values referred to by heap
 } PRIORITY_QUEUE;
 
 // Initialize a newly allocated priority queue structure.
@@ -34,8 +34,8 @@ void pq_set_up(PRIORITY_QUEUE *q, PRIORITY_QUEUE_VALUE *values, int size);
 // and given heap indices.  Note the indices are owned by the heap
 // after set up and will be freed with the heap.
 void pq_set_up_heap(PRIORITY_QUEUE *q,
-		int *heap, int size,
-		PRIORITY_QUEUE_VALUE *values, int max_size);
+        int *heap, int size,
+        PRIORITY_QUEUE_VALUE *values, int max_size);
 
 // Return the index of the minimum value on the queue.
 int pq_peek_min(PRIORITY_QUEUE *q);
@@ -53,18 +53,15 @@ void pq_add(PRIORITY_QUEUE *q, int i);
 void pq_delete(PRIORITY_QUEUE *q, int i);
 
 // Return an array containing indices currently in the heap.
-#define pq_index_set(Q)			((Q)->heap)
+#define pq_index_set(Q)         ((Q)->heap)
 
 // Return an array containing indices currently in the heap.
-#define pq_index(Q, I)			((Q)->heap[I])
+#define pq_index(Q, I)          ((Q)->heap[I])
 
 // Return the size of the index array contained above.
-#define pq_index_set_size(Q)	((Q)->size)
+#define pq_index_set_size(Q)    ((Q)->size)
 
 // Return non-zero iff the queue is empty.
 #define pq_empty_p(Q) ((Q)->size <= 0)
-
-// Run the heap module through some unit tests.
-int pq_test(int size);
 
 #endif /* PRIORITY_QUEUE_H_ */

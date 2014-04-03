@@ -2,7 +2,7 @@
 *.rbc
 *.o
 *.d
-.bundle
+*.bundle
 .config
 .yardoc
 .idea/
