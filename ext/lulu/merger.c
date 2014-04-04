@@ -36,7 +36,7 @@
 int merge_markers_fast(MARKER_INFO *info, MARKER *markers, int n_markers) {
     int augmented_length = 2 * n_markers - 1;
     NewArrayDecl(int, n_nghbr, augmented_length);
-    NewArrayDecl(DISTANCE, mindist, augmented_length);
+    NewArrayDecl(MARKER_DISTANCE, mindist, augmented_length);
     NewArrayDecl(int, inv_nghbr_head, augmented_length);
     NewArrayDecl(int, inv_nghbr_next, augmented_length);
     NewArrayDecl(int, tmp, augmented_length); // Too big

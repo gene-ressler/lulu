@@ -53,6 +53,7 @@ void *safe_realloc(void *p, size_t size, const char *file, int line);
 } while (0)
 
 #define Free(Ptr) do { \
+    xfree(Ptr); \
     Ptr = NULL; \
 } while (0)
 

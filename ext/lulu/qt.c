@@ -14,10 +14,10 @@
 
 // Declare the given quadrant of a given bounding box.
 #define QUADRANT_DECL(Q, QX, QY, QW, QH, X, Y, W, H) \
-  double QW = W * 0.5; \
-  double QH = H * 0.5; \
-  double QX = (Q & 1) ? X + QW : X; \
-  double QY = (Q & 2) ? Y + QH : Y
+  MARKER_DISTANCE QW = W * 0.5; \
+  MARKER_DISTANCE QH = H * 0.5; \
+  MARKER_COORD QX = (Q & 1) ? X + QW : X; \
+  MARKER_COORD QY = (Q & 2) ? Y + QH : Y
 
 // Initialize a node to an empty leaf.
 static void init_leaf(NODE *node) {
@@ -87,18 +87,18 @@ static int delete_marker(NODE *node, MARKER *marker) {
 }
 
 // Return non-zero iff the given bounding box lies inside the marker including its boundary.
-static int bounds_inside_marker(double x, double y, double w, double h, MARKER *marker) {
-    double mx = mr_x(marker);
-    double my = mr_y(marker);
-    double mr = mr_r(marker);
-    return mx - mr <= x && x + w <= mx + mr && my - mr <= y && y + h <= my + mr ;
+static int bounds_inside_marker(MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h, MARKER *marker) {
+    MARKER_COORD mx = mr_x(marker);
+    MARKER_COORD my = mr_y(marker);
+    MARKER_DISTANCE mr = mr_r(marker);
+    return mx - mr <= x && x + w <= mx + mr && my - mr <= y && y + h <= my + mr;
 }
 
 // Return an integer code with bits showing which quadrants of the given
 // bounding box are overlapped by the given marker.
-static int touch_code(double x, double y, double w, double h, MARKER *marker) {
-    double xm = x + 0.5 * w;
-    double ym = y + 0.5 * h;
+static int touch_code(MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h, MARKER *marker) {
+    MARKER_COORD xm = x + 0.5 * w;
+    MARKER_COORD ym = y + 0.5 * h;
     int code = bit(SW) | bit(SE) | bit(NW) | bit(NE);
     if (mr_e(marker) < xm) code &= ~(bit(NE) | bit(SE));
     if (mr_w(marker) > xm) code &= ~(bit(NW) | bit(SW));
@@ -109,7 +109,7 @@ static int touch_code(double x, double y, double w, double h, MARKER *marker) {
 
 // Insert the given marker into the quadtree with given root and corresponding bounding box,
 // subdividing no more than the given number of levels.
-static void insert(NODE *node, int levels, double x, double y, double w, double h, MARKER *marker) {
+static void insert(NODE *node, int levels, MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h, MARKER *marker) {
     if (bounds_inside_marker(x, y, w, h, marker) || levels == 0)
         add_marker(node, marker);
     else {
@@ -134,7 +134,9 @@ static int empty_leaves_p(NODE *children) {
 
 // Delete the given marker from the quadtree with given root and corresponding bounding box,
 // trimming any remaining empty leaves.
-static void delete(NODE *node, int levels, double x, double y, double w, double h, MARKER *marker) {
+static void delete(NODE *node, int levels,
+        MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h,
+        MARKER *marker) {
     if (bounds_inside_marker(x, y, w, h, marker) || levels == 0)
         delete_marker(node, marker);
     else if (internal_p(node)){
@@ -153,7 +155,7 @@ static void delete(NODE *node, int levels, double x, double y, double w, double 
 struct nearest_info {
     MARKER_INFO *info;
     MARKER *target, *nearest;
-    double distance;
+    MARKER_DISTANCE distance;
 };
 
 // Use the marker list of the given node to update nearest information with
@@ -162,7 +164,7 @@ static void update_nearest(NODE *node, struct nearest_info *nearest_info) {
     for (int i = 0; i < node->marker_count; i++) {
         // This < assumes the markers are in an array. It sustains the invariant.
         if (node->markers[i] < nearest_info->target) {
-            double d = mr_distance(nearest_info->info, nearest_info->target, node->markers[i]);
+            MARKER_DISTANCE d = mr_distance(nearest_info->info, nearest_info->target, node->markers[i]);
             if (d < nearest_info->distance) {
                 nearest_info->distance = d;
                 nearest_info->nearest = node->markers[i];
@@ -175,7 +177,9 @@ static void update_nearest(NODE *node, struct nearest_info *nearest_info) {
 // quad that overlaps the given marker and remembers the closest marker it sees. The
 // circle distance function renders quite impossible the ruling out of quads as in
 // nearest point neighbor search.
-static void search_for_nearest(NODE *node, double x, double y, double w, double h, struct nearest_info *nearest_info) {
+static void search_for_nearest(NODE *node,
+        MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h,
+        struct nearest_info *nearest_info) {
     update_nearest(node, nearest_info);
     if (internal_p(node)) {
         // Search the children that include some part of the marker.
@@ -188,7 +192,9 @@ static void search_for_nearest(NODE *node, double x, double y, double w, double 
     }
 }
 
-static MARKER *nearest(MARKER_INFO *info, NODE *node, double x, double y, double w, double h, MARKER *marker) {
+static MARKER *nearest(MARKER_INFO *info, NODE *node,
+        MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h,
+        MARKER *marker) {
     struct nearest_info nearest_info[1] = {{ info, marker, NULL, 0 }};
     search_for_nearest(node, x, y, w, h, nearest_info);
     return nearest_info->nearest;
@@ -199,7 +205,9 @@ void qt_init(QUADTREE *qt) {
     qt->x = qt->y = qt->w = qt->h = 0;
 }
 
-void qt_setup(QUADTREE *qt, int max_depth, double x, double y, double w, double h, MARKER_INFO *info) {
+void qt_setup(QUADTREE *qt, int max_depth,
+        MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h,
+        MARKER_INFO *info) {
     qt->x = x;
     qt->y = y;
     qt->w = w;
@@ -214,9 +222,9 @@ void qt_clear(QUADTREE *qt) {
 }
 
 void qt_insert(QUADTREE *qt, MARKER *marker) {
-    double x = mr_x(marker);
-    double y = mr_y(marker);
-    double r = mr_r(marker);
+    MARKER_COORD x = mr_x(marker);
+    MARKER_COORD y = mr_y(marker);
+    MARKER_DISTANCE r = mr_r(marker);
     if (x + r >= qt->x && x - r <= qt->x + qt->w && y + r >= qt->y && y - r <= qt->y + qt->h)
         insert(qt->root, qt->max_depth, qt->x, qt->y, qt->w, qt->h, marker);
 }

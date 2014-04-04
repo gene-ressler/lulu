@@ -53,7 +53,7 @@ void free_marker_list(MARKER_LIST *list) {
     Free(list);
 }
 
-void add_marker(MARKER_LIST *list, COORD x, COORD y, SIZE size) {
+void add_marker(MARKER_LIST *list, MARKER_COORD x, MARKER_COORD y, MARKER_SIZE size) {
     if (list->size >= list->max_size) {
         list->max_size = 4 + 2 * list->max_size;
         RenewArray(list->markers, list->max_size);

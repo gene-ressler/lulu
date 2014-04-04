@@ -19,7 +19,7 @@ void mr_info_init(MARKER_INFO *info) {
     info->c = SQRT_1_PI;
 }
 
-void mr_info_set(MARKER_INFO *info, MARKER_KIND kind, DISTANCE scale) {
+void mr_info_set(MARKER_INFO *info, MARKER_KIND kind, MARKER_DISTANCE scale) {
     info->kind = kind;
     info->scale = scale;
     info->c = scale * (kind == SQUARE ? 0.5 : SQRT_1_PI);
@@ -41,7 +41,7 @@ void mr_reset_parts(MARKER *marker) {
     marker->part_b = 0;
 }
 
-void mr_set(MARKER_INFO *info, MARKER *marker, COORD x, COORD y, SIZE size) {
+void mr_set(MARKER_INFO *info, MARKER *marker, MARKER_COORD x, MARKER_COORD y, MARKER_SIZE size) {
     mr_init(marker, 1);
     marker->size = size;
     marker->r = size_to_radius(info, size);
@@ -66,34 +66,34 @@ void mr_merge(MARKER_INFO *info, MARKER *markers, int i_merged, int ia, int ib) 
     merged->part_b = ib;
 }
 
-DISTANCE size_to_radius(MARKER_INFO *info, SIZE size) {
+MARKER_DISTANCE size_to_radius(MARKER_INFO *info, MARKER_SIZE size) {
     return info->c * sqrt(size);
 }
 
-DISTANCE mr_distance(MARKER_INFO *info, MARKER *a, MARKER *b) {
+MARKER_DISTANCE mr_distance(MARKER_INFO *info, MARKER *a, MARKER *b) {
     if (info->kind == SQUARE) {
-        double r_sum = mr_r(a) + mr_r(b);
-        double dx = fabs(mr_x(b) - mr_x(a)) - r_sum;
-        double dy = fabs(mr_y(b) - mr_y(a)) - r_sum;
-        DISTANCE d = dx < 0 && dy < 0 ? fmax(dx, dy) : sqrt(dx * dx + dy * dy);
+        MARKER_DISTANCE r_sum = mr_r(a) + mr_r(b);
+        MARKER_DISTANCE dx = fabs(mr_x(b) - mr_x(a)) - r_sum;
+        MARKER_DISTANCE dy = fabs(mr_y(b) - mr_y(a)) - r_sum;
+        MARKER_DISTANCE d = dx < 0 && dy < 0 ? fmax(dx, dy) : sqrt(dx * dx + dy * dy);
         return d;
     }
-    double dx = mr_x(b) - mr_x(a);
-    double dy = mr_y(b) - mr_y(a);
+    MARKER_DISTANCE dx = mr_x(b) - mr_x(a);
+    MARKER_DISTANCE dy = mr_y(b) - mr_y(a);
     return sqrt(dx * dx + dy * dy) - mr_r(a) - mr_r(b);
 }
 
 void get_marker_array_extent(MARKER *a, int n_markers, MARKER_EXTENT *ext) {
     if (n_markers > 0) {
-        double ew = mr_w(a);
-        double ee = mr_e(a);
-        double es = mr_s(a);
-        double en = mr_n(a);
+        MARKER_DISTANCE ew = mr_w(a);
+        MARKER_DISTANCE ee = mr_e(a);
+        MARKER_DISTANCE es = mr_s(a);
+        MARKER_DISTANCE en = mr_n(a);
         for (int i = 1; i < n_markers; i++) {
-            double w = mr_w(a + i);
-            double e = mr_e(a + i);
-            double s = mr_s(a + i);
-            double n = mr_n(a + i);
+            MARKER_DISTANCE w = mr_w(a + i);
+            MARKER_DISTANCE e = mr_e(a + i);
+            MARKER_DISTANCE s = mr_s(a + i);
+            MARKER_DISTANCE n = mr_n(a + i);
             if (w < ew)
                 ew = w;
             if (e > ee)

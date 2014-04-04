@@ -37,7 +37,8 @@ typedef struct node_s {
 #define NE 3
 
 typedef struct quadtree_s {
-    double x, y, w, h;
+    MARKER_COORD x, y;
+    MARKER_DISTANCE w, h;
     int max_depth;
     MARKER_INFO *info;
     NODE root[1];
@@ -46,7 +47,9 @@ typedef struct quadtree_s {
 #define QUADTREE_DECL(Name) QUADTREE Name[1]; qt_init(Name)
 
 void qt_init(QUADTREE *qt);
-void qt_setup(QUADTREE *qt, int max_depth, double x, double y, double w, double h, MARKER_INFO *info);
+void qt_setup(QUADTREE *qt, int max_depth,
+        MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h,
+        MARKER_INFO *info);
 void qt_insert(QUADTREE *qt, MARKER *marker);
 void qt_delete(QUADTREE *qt, MARKER *marker);
 MARKER *qt_nearest(QUADTREE *qt, MARKER *marker);
