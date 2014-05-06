@@ -8,6 +8,8 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+#include "namespace.h"
+
 #define STATIC_ARRAY_SIZE(A) ((int)(sizeof A / sizeof A[0]))
 
 #ifdef LULU_STD_C
@@ -30,7 +32,10 @@
     Ptr = NULL; \
 } while (0)
 
+#define safe_malloc(Size, File, Line)   NAME(safe_malloc)(Size, File, Line)
 void *safe_malloc(size_t size, const char *file, int line);
+
+#define safe_realloc(P, Size, File, Line)   NAME(safe_realloc)(P, Size, File, Line)
 void *safe_realloc(void *p, size_t size, const char *file, int line);
 
 #endif
@@ -72,6 +77,7 @@ void trace(const char *fmt, ...);
 #define TRACE(Args)
 #endif
 
+#define high_bit_position(N)    NAME(high_bit_position)(N)
 int high_bit_position(unsigned n);
 
 #endif /* UTILITY_H_ */

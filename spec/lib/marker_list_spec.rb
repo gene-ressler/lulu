@@ -3,14 +3,7 @@ require 'spec_helper'
 # Test the Lulu API.
 describe Lulu::MarkerList do
 
-  TEST_SIZE = 10000
-
-  let(:list) do
-    list = Lulu::MarkerList.new
-    srand(42)
-    TEST_SIZE.times{ |n| list.add(Random.rand(1000), Random.rand(1000), Random.rand(100)) }
-    list
-  end
+  let(:list) { new_marker_list }
 
   it 'should have length matching number of markers added' do
     list.length.should == TEST_SIZE
@@ -34,6 +27,10 @@ describe Lulu::MarkerList do
     n = 0
     list.merge.times{|i| n += 1 if [:root, :single].include? list.parts(i)[0] }
     n.should == list.compress
+  end
+
+  it 'should perform fine over multiple runs with unit increases in input length to provoke memory bugs' do
+    1000.times { |i| new_marker_list(10000 + i).merge }
   end
 
 end

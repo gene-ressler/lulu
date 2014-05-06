@@ -8,6 +8,7 @@
 #ifndef QT_H_
 #define QT_H_
 
+#include "namespace.h"
 #include "marker.h"
 
 typedef struct node_s {
@@ -46,13 +47,27 @@ typedef struct quadtree_s {
 
 #define QUADTREE_DECL(Name) QUADTREE Name[1]; qt_init(Name)
 
+#define qt_init(T)  NAME(qt_init)(T)
 void qt_init(QUADTREE *qt);
+
+#define qt_setup(T, MaxDepth, X, Y, W, H, Info) NAME(qt_setup)(T, MaxDepth, X, Y, W, H, Info)
 void qt_setup(QUADTREE *qt, int max_depth,
         MARKER_COORD x, MARKER_COORD y, MARKER_DISTANCE w, MARKER_DISTANCE h,
         MARKER_INFO *info);
+
+#define qt_clear(T) NAME(qt_clear)(T)
+void qt_clear(QUADTREE *qt);
+
+#define qt_insert(T, Marker)    NAME(qt_insert)(T, Marker)
 void qt_insert(QUADTREE *qt, MARKER *marker);
+
+#define qt_delete(T, Marker)    NAME(qt_delete)(T, Marker)
 void qt_delete(QUADTREE *qt, MARKER *marker);
+
+#define qt_nearest(T, Marker)   NAME(qt_nearest)(T, Marker)
 MARKER *qt_nearest(QUADTREE *qt, MARKER *marker);
+
+#define qt_nearest_wrt(Markers, T, A)   NAME(qt_nearest_wrt)(Markers, T, A)
 int qt_nearest_wrt(MARKER *markers, QUADTREE *qt, int a);
 
 #endif /* QT_H_ */

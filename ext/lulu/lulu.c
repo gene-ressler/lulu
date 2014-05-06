@@ -31,29 +31,29 @@ typedef struct marker_list_s {
 #define MARKER_LIST_DECL(Name)  MARKER_LIST Name[1]; init_marker_list(Name)
 #define ml_set_marker_list_info(L, Kind, Scale)  mr_info_set((L)->info, (Kind), (Scale))
 
-void init_marker_list(MARKER_LIST *list) {
+static void init_marker_list(MARKER_LIST *list) {
     mr_info_init(list->info);
     list->markers = NULL;
     list->size = list->max_size = 0;
 }
 
-MARKER_LIST *new_marker_list(void) {
+static MARKER_LIST *new_marker_list(void) {
     NewDecl(MARKER_LIST, list);
     init_marker_list(list);
     return list;
 }
 
-void clear_marker_list(MARKER_LIST *list) {
+static void clear_marker_list(MARKER_LIST *list) {
     Free(list->markers);
     init_marker_list(list);
 }
 
-void free_marker_list(MARKER_LIST *list) {
+static void free_marker_list(MARKER_LIST *list) {
     clear_marker_list(list);
     Free(list);
 }
 
-void add_marker(MARKER_LIST *list, MARKER_COORD x, MARKER_COORD y, MARKER_SIZE size) {
+static void add_marker(MARKER_LIST *list, MARKER_COORD x, MARKER_COORD y, MARKER_SIZE size) {
     if (list->size >= list->max_size) {
         list->max_size = 4 + 2 * list->max_size;
         RenewArray(list->markers, list->max_size);
@@ -62,7 +62,7 @@ void add_marker(MARKER_LIST *list, MARKER_COORD x, MARKER_COORD y, MARKER_SIZE s
     mr_set(list->info, marker, x, y, size);
 }
 
-void ensure_headroom(MARKER_LIST *list) {
+static void ensure_headroom(MARKER_LIST *list) {
     int needed_size = 2 * list->size - 1;
     if (list->max_size < needed_size) {
         list->max_size = needed_size;
@@ -70,7 +70,7 @@ void ensure_headroom(MARKER_LIST *list) {
     }
 }
 
-void compress(MARKER_LIST *list) {
+static void compress(MARKER_LIST *list) {
     int dst = 0;
     for (int src = 0; src < list->size; src++)
         if (!mr_deleted_p(list->markers + src)) {
@@ -84,24 +84,24 @@ void compress(MARKER_LIST *list) {
 
 // -------- Ruby API implementation --------------------------------------------
 
-static void rb_api_free_marker_list(void *list) {
+static void lulu_rb_api_free_marker_list(void *list) {
     free_marker_list(list);
 }
 
-static VALUE rb_api_new_marker_list(VALUE klass) {
+static VALUE lulu_rb_api_new_marker_list(VALUE klass) {
     MARKER_LIST *list = new_marker_list();
-    return Data_Wrap_Struct(klass, 0, rb_api_free_marker_list, list);
+    return Data_Wrap_Struct(klass, 0, lulu_rb_api_free_marker_list, list);
 }
 
 #define MARKER_LIST_FOR_VALUE_DECL(Var) MARKER_LIST *Var; Data_Get_Struct(Var ## _value, MARKER_LIST, Var)
 
-static VALUE rb_api_initialize_copy(VALUE dst_value, VALUE src_value)
+static VALUE lulu_rb_api_initialize_copy(VALUE dst_value, VALUE src_value)
 #define ARGC_initialize_copy 1
 {
     if (dst_value == src_value)
         return src_value;
 
-    if (TYPE(src_value) != T_DATA || RDATA(src_value)->dfree != (RUBY_DATA_FUNC)rb_api_free_marker_list)
+    if (TYPE(src_value) != T_DATA || RDATA(src_value)->dfree != (RUBY_DATA_FUNC)lulu_rb_api_free_marker_list)
         rb_raise(rb_eTypeError, "type mismatch (copy_marker_list)");
 
     MARKER_LIST_FOR_VALUE_DECL(src);
@@ -115,7 +115,7 @@ static VALUE rb_api_initialize_copy(VALUE dst_value, VALUE src_value)
     return dst_value;
 }
 
-static VALUE rb_api_clear(VALUE self_value)
+static VALUE lulu_rb_api_clear(VALUE self_value)
 #define ARGC_clear 0
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -123,7 +123,7 @@ static VALUE rb_api_clear(VALUE self_value)
     return self_value;
 }
 
-static VALUE rb_api_set_info(VALUE self_value, VALUE kind_value, VALUE scale_value)
+static VALUE lulu_rb_api_set_info(VALUE self_value, VALUE kind_value, VALUE scale_value)
 #define ARGC_set_info 2
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -144,7 +144,7 @@ static VALUE rb_api_set_info(VALUE self_value, VALUE kind_value, VALUE scale_val
     return self_value;
 }
 
-static VALUE rb_api_add(VALUE self_value, VALUE x_value, VALUE y_value, VALUE size_value)
+static VALUE lulu_rb_api_add(VALUE self_value, VALUE x_value, VALUE y_value, VALUE size_value)
 #define ARGC_add 3
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -152,14 +152,14 @@ static VALUE rb_api_add(VALUE self_value, VALUE x_value, VALUE y_value, VALUE si
     return INT2FIX(self->size);
 }
 
-static VALUE rb_api_length(VALUE self_value)
+static VALUE lulu_rb_api_length(VALUE self_value)
 #define ARGC_length 0
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
     return INT2FIX(self->size);
 }
 
-static VALUE rb_api_marker(VALUE self_value, VALUE index)
+static VALUE lulu_rb_api_marker(VALUE self_value, VALUE index)
 #define ARGC_marker 1
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -175,7 +175,7 @@ static VALUE rb_api_marker(VALUE self_value, VALUE index)
     return Qnil;
 }
 
-static VALUE rb_api_parts(VALUE self_value, VALUE index)
+static VALUE lulu_rb_api_parts(VALUE self_value, VALUE index)
 #define ARGC_parts 1
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -197,7 +197,7 @@ static VALUE rb_api_parts(VALUE self_value, VALUE index)
     return Qnil;
 }
 
-static VALUE rb_api_deleted(VALUE self_value, VALUE index)
+static VALUE lulu_rb_api_deleted(VALUE self_value, VALUE index)
 #define ARGC_deleted 1
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -207,7 +207,7 @@ static VALUE rb_api_deleted(VALUE self_value, VALUE index)
     return Qnil;
 }
 
-static VALUE rb_api_compress(VALUE self_value)
+static VALUE lulu_rb_api_compress(VALUE self_value)
 #define ARGC_compress 0
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
@@ -215,23 +215,25 @@ static VALUE rb_api_compress(VALUE self_value)
     return INT2FIX(self->size);
 }
 
-static VALUE rb_api_merge(VALUE self_value)
+static VALUE lulu_rb_api_merge(VALUE self_value)
 #define ARGC_merge 0
 {
     MARKER_LIST_FOR_VALUE_DECL(self);
-    ensure_headroom(self);
     compress(self);
+    ensure_headroom(self);
     self->size = merge_markers_fast(self->info, self->markers, self->size);
     return INT2FIX(self->size);
 }
 
-#define FUNCTION_TABLE_ENTRY(Name) { #Name, RUBY_METHOD_FUNC(rb_api_ ## Name), ARGC_ ## Name }
+#define FUNCTION_TABLE_ENTRY(Name) { #Name, RUBY_METHOD_FUNC(lulu_rb_api_ ## Name), ARGC_ ## Name }
 
-static struct ft_entry {
+struct ft_entry {
     const char *name;
     VALUE (*func)(ANYARGS);
     int argc;
-} function_table[] = {
+};
+
+static struct ft_entry function_table[] = {
     FUNCTION_TABLE_ENTRY(add),
     FUNCTION_TABLE_ENTRY(compress),
     FUNCTION_TABLE_ENTRY(clear),
@@ -246,10 +248,12 @@ static struct ft_entry {
 
 #define STRING_CONST_TABLE_ENTRY(Name) { #Name, Name }
 
-static struct sct_entry {
+struct sct_entry {
     const char *name;
     const char *val;
-} string_const_table[] = {
+};
+
+static struct sct_entry string_const_table[] = {
     STRING_CONST_TABLE_ENTRY(EXT_VERSION)
 };
 
@@ -257,7 +261,7 @@ void Init_lulu(void)
 {
     VALUE module = rb_define_module("Lulu");
     VALUE klass = rb_define_class_under(module, "MarkerList", rb_cObject);
-    rb_define_alloc_func(klass, rb_api_new_marker_list);
+    rb_define_alloc_func(klass, lulu_rb_api_new_marker_list);
 
     for (int i = 0; i < STATIC_ARRAY_SIZE(function_table); i++) {
         struct ft_entry *e = function_table + i;

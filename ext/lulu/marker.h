@@ -8,6 +8,8 @@
 #ifndef MARKER_H_
 #define MARKER_H_
 
+#include "namespace.h"
+
 typedef double MARKER_COORD;
 typedef double MARKER_DISTANCE;
 /**
@@ -57,14 +59,31 @@ typedef struct marker_extent_s {
 #define mr_s(M) ((M)->y - (M)->r)
 #define mr_n(M) ((M)->y + (M)->r)
 
+#define mr_init(Marker, NMarkers)   NAME(mr_init)(Marker, NMarkers)
 void mr_init(MARKER *marker, int n_markers);
+
+#define mr_reset_parts(Marker) NAME(mr_reset_parts)(Marker)
 void mr_reset_parts(MARKER *marker);
+
+#define mr_info_init(Info)  NAME(mr_info_init)(Info)
 void mr_info_init(MARKER_INFO *info);
+
+#define mr_info_set(Info, Kind, Scale) NAME(mr_info_set)(Info, Kind, Scale)
 void mr_info_set(MARKER_INFO *info, MARKER_KIND kind, MARKER_DISTANCE scale);
+
+#define mr_set(Info, Marker, X, Y, Size)    NAME(mr_set)(Info, Marker, X, Y, Size)
 void mr_set(MARKER_INFO *info, MARKER *marker, MARKER_COORD x, MARKER_COORD y, MARKER_SIZE size);
+
+#define mr_merge(Info, Markers, Merged, A, B)   NAME(mr_merge)(Info, Markers, Merged, A, B)
 void mr_merge(MARKER_INFO *info, MARKER *markers, int merged, int a, int b);
+
+#define mr_distance(Info, A, B)     NAME(mr_distance)(Info, A, B)
 MARKER_DISTANCE mr_distance(MARKER_INFO *info, MARKER *a, MARKER *b);
+
+#define size_to_radius(Info, Size)  NAME(size_to_radius)(Info, Size)
 MARKER_DISTANCE size_to_radius(MARKER_INFO *info, MARKER_SIZE size);
+
+#define get_marker_array_extent(A, NMarkers, Ext)   NAME(get_marker_array_extent)(A, NMarkers, Ext)
 void get_marker_array_extent(MARKER *a, int n_markers, MARKER_EXTENT *ext);
 
 #endif /* MARKER_H_ */
